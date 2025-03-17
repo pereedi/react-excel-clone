@@ -1,54 +1,37 @@
-# React + TypeScript + Vite
+# React Spreadsheet App
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A lightweight, high-performance spreadsheet built with **React** and **Vite**, supporting large datasets and formula evaluation.
 
-Currently, two official plugins are available:
+## 📦 Technologies Used
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React** – Core UI library
+- **Vite** – Fast development and build tool
+- **react-window** – Efficiently renders large grids for smooth scrolling
+- **mathjs** – Evaluates mathematical formulas entered in cells
 
-## Expanding the ESLint configuration
+## 🚀 Installation & Running
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+```sh
+# Clone the repository
+git clone https://github.com/clinton-slice/react-excel-clone.git
+cd spreadsheet-app
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+# Install dependencies
+npm install
+
+# Start the development server
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+Open [http://localhost:5173](http://localhost:5173) in your browser.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## 📌 Features
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
-```
+- Virtualized spreadsheet with **10,000 x 10,000** cells
+- **Formula support** (e.g., `=A1 + B1`)
+- **Excel-style column headers** (`A-Z, AA, AB...`) and row labels (`1, 2, 3...`)
+- Optimized **state management** for smooth performance
+
+## 🏗 License
+
+MIT License.
