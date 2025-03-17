@@ -9,6 +9,10 @@ A lightweight, high-performance spreadsheet built with **React** and **Vite**, s
 - **react-window** – Efficiently renders large grids for smooth scrolling
 - **mathjs** – Evaluates mathematical formulas entered in cells
 
+## Live Preview
+
+🔗 [Click here to try the app](https://react-excel-clone.vercel.app/)
+
 ## 🚀 Installation & Running
 
 ```sh
