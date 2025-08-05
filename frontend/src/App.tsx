@@ -1,6 +1,8 @@
 import { useState, useCallback, useRef } from "react";
 import { FixedSizeGrid as Grid } from "react-window";
 import { getColumnLabel, getCellKey, evaluateFormula } from "./utils";
+import FileMenu from "./components/FileMenu";
+import { exportToCSV, exportToXLSX, exportToPDF, exportToHTML } from "./components/utils/exportUtils";
 import "./App.css";
 
 // Import the API functions and types
@@ -108,6 +110,59 @@ const App: React.FC = () => {
     // }
   };
   
+   // --- NEW HANDLER FUNCTIONS ---
+
+  const handleNewFile = () => {
+    dataRef.current.clear();
+    setCurrentFileId(null);
+    setCurrentFileName("Untitled Sheet");
+    forceUpdate({}); // Force the grid to re-render with empty data
+  };
+
+  const handleOpenFile = () => {
+    // We use a hidden input element to trigger the file dialog
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json'; // For simplicity, we assume we open our own JSON format
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0];
+      if (!file) return;
+
+      const text = await file.text();
+      try {
+        const loadedData = JSON.parse(text);
+        const newMap = new Map(Object.entries(loadedData));
+        dataRef.current = newMap;
+        setCurrentFileName(file.name.replace('.json', ''));
+        setCurrentFileId(null); // It's a new local file, not from DB
+        forceUpdate({});
+      } catch (err) {
+        alert('Error: Could not parse the file. Please ensure it is a valid JSON file.');
+      }
+    };
+    input.click();
+  };
+
+  const handleExport = (format: 'csv' | 'xlsx' | 'pdf' | 'html') => {
+    const data = dataRef.current;
+    const fileName = currentFileName;
+
+    switch (format) {
+      case 'csv':
+        exportToCSV(data, fileName);
+        break;
+      case 'xlsx':
+        exportToXLSX(data, fileName);
+        break;
+      case 'pdf':
+        exportToPDF(data, fileName);
+        break;
+      case 'html':
+        exportToHTML(data, fileName);
+        break;
+    }
+  };
+
   // --- RENDERING ---
   const renderCell = ({ columnIndex, rowIndex, style }: RenderCellT) => {
     // ... (Your existing renderCell logic is perfect and doesn't need to change)
@@ -142,6 +197,7 @@ const App: React.FC = () => {
     // Add a wrapper to include a header for our buttons
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%' }}>
       <div className="app-header">
+         <FileMenu onNew={handleNewFile} onOpen={handleOpenFile} onExport={handleExport} />
         <input 
           type="text"
           value={currentFileName}
