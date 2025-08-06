@@ -56,3 +56,9 @@
   min-width: 180px;
   padding: 5px 0;
 }
+
+.dropdown-item-static {
+  padding: 8px 15px;
+  color: #aaa;
+  cursor: default;
+}

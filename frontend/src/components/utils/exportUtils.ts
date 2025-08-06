@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { getColumnLabel, getCellKey } from '../../utils'; // Assuming these are exported from your existing utils
 
 // Helper to convert Map data to a 2D array
@@ -90,10 +90,13 @@ export const exportToXLSX = (data: Map<string, string>, fileName: string) => {
 
 export const exportToPDF = (data: Map<string, string>, fileName: string) => {
   const doc = new jsPDF();
-  (doc as any).autoTable({
+  
+  // v-- CHANGE #2: Call autoTable as a function, passing 'doc' as the first argument
+  autoTable(doc, { 
     head: [['Cell Key', 'Value']],
     body: mapTo2DArray(data),
   });
+
   doc.save(`${fileName}.pdf`);
 };
 

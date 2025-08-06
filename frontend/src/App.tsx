@@ -6,7 +6,8 @@ import { exportToCSV, exportToXLSX, exportToPDF, exportToHTML } from "./componen
 import "./App.css";
 
 // Import the API functions and types
-import { createSpreadsheetAPI, updateSpreadsheetAPI, SpreadsheetData } from "./services/api";
+import { createSpreadsheetAPI, updateSpreadsheetAPI, SpreadsheetData,  getSpreadsheetByIdAPI } from "./services/api";
+
 
 const NUM_ROWS = 10000;
 const NUM_COLS = 10000;
@@ -163,6 +164,32 @@ const App: React.FC = () => {
     }
   };
 
+  // --- NEW HANDLER FOR RECENT FILE SELECTION ---
+  const handleRecentFileSelect = async (fileId: string) => {
+    try {
+      console.log(`Loading file with ID: ${fileId}`);
+      const response = await getSpreadsheetByIdAPI(fileId);
+      const fileToLoad = response.data;
+
+      // The backend returns the entire document, but the grid data is in the 'data' property
+      const gridData = fileToLoad.data;
+
+      // Convert the loaded plain object back into a Map for our ref
+      const newMap = new Map(Object.entries(gridData));
+      dataRef.current = newMap;
+      
+      // Update the current file's info in the state
+      setCurrentFileId(fileToLoad._id);
+      setCurrentFileName(fileToLoad.fileName);
+
+      // Force the grid to re-render with the new data from the ref
+      forceUpdate({});
+    } catch (error) {
+      console.error("Failed to load recent file:", error);
+      alert("Error: Could not load the selected file.");
+    }
+  };
+
   // --- RENDERING ---
   const renderCell = ({ columnIndex, rowIndex, style }: RenderCellT) => {
     // ... (Your existing renderCell logic is perfect and doesn't need to change)
@@ -197,7 +224,12 @@ const App: React.FC = () => {
     // Add a wrapper to include a header for our buttons
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', width: '100%' }}>
       <div className="app-header">
-         <FileMenu onNew={handleNewFile} onOpen={handleOpenFile} onExport={handleExport} />
+         <FileMenu 
+         onNew={handleNewFile} 
+         onOpen={handleOpenFile}
+         onExport={handleExport} 
+         onRecentFileSelect={handleRecentFileSelect} // Pass the new handler
+          />
         <input 
           type="text"
           value={currentFileName}
