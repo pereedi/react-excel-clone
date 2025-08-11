@@ -1,6 +1,9 @@
 import { evaluate } from "mathjs";
 
-export const getColumnLabel = (col: number) => {
+/**
+ * Converts a zero-based column index to an Excel-style column label (A, B, C...).
+ */
+export const getColumnLabel = (col: number): string => {
   let label = "";
   while (col >= 0) {
     label = String.fromCharCode((col % 26) + 65) + label;
@@ -9,11 +12,17 @@ export const getColumnLabel = (col: number) => {
   return label;
 };
 
-export const getCellKey = (row: number, col: number) => {
+/**
+ * Creates a standard cell key (e.g., "A1", "B2") from row and column indices.
+ */
+export const getCellKey = (row: number, col: number): string => {
   return `${getColumnLabel(col)}${row + 1}`;
 };
 
-export const evaluateFormula = (formula: string, data: Map<string, string>) => {
+/**
+ * Evaluates a formula string (e.g., "=A1+B2") by replacing cell references with their values.
+ */
+export const evaluateFormula = (formula: string, data: Map<string, string>): string | number => {
   try {
     if (formula.startsWith("=")) {
       const expr = formula
