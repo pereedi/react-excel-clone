@@ -5,11 +5,19 @@ const Spreadsheet = require('../models/spreadsheetModel');
 // @route   GET /api/spreadsheets
 exports.getSpreadsheets = async (req, res) => {
   try {
-    // Find all spreadsheets but only return their id, fileName, and updatedAt
-    const spreadsheets = await Spreadsheet.find().select('fileName updatedAt');
+    // Find all spreadsheets, sort by most recently updated, and limit to 10.
+    // The .lean() method makes the query faster as it returns plain JS objects.
+    const spreadsheets = await Spreadsheet.find()
+      .sort({ updatedAt: -1 })
+      .limit(10)
+      .select('fileName updatedAt') // Only select the fields we need
+      .lean(); 
+
     res.status(200).json(spreadsheets);
   } catch (error) {
-    res.status(500).json({ message: 'Server Error', error: error.message });
+    // This log is crucial for debugging
+    console.error('Error in getSpreadsheets controller:', error); 
+    res.status(500).json({ message: 'Server Error while fetching spreadsheets', error: error.message });
   }
 };
 

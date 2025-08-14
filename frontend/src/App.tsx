@@ -1,6 +1,7 @@
 import { useState, useCallback, useRef } from "react";
 import { FixedSizeGrid as Grid } from "react-window";
 import { getColumnLabel, getCellKey, evaluateFormula } from "./utils";
+import * as XLSX from 'xlsx';
 import FileMenu from "./components/FileMenu";
 import { exportToCSV, exportToXLSX, exportToPDF, exportToHTML } from "./components/utils/exportUtils";
 import "./App.css";
@@ -120,30 +121,60 @@ const App: React.FC = () => {
     forceUpdate({}); // Force the grid to re-render with empty data
   };
 
-  const handleOpenFile = () => {
-    // We use a hidden input element to trigger the file dialog
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.json'; // For simplicity, we assume we open our own JSON format
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (!file) return;
+const handleOpenFile = () => {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = ".xlsx, .xls, .csv, .ods, .json"; // Allow all these file types
 
-      const text = await file.text();
-      try {
+  input.onchange = async (e) => {
+    const file = (e.target as HTMLInputElement).files?.[0];
+    if (!file) return;
+
+    try {
+      const fileName = file.name.split('.').slice(0, -1).join('.');
+      let newMap = new Map<string, string>();
+
+      // --- LOGIC TO HANDLE DIFFERENT FILE TYPES ---
+      if (file.type === 'application/json') {
+        // Handle our custom JSON format
+        const text = await file.text();
         const loadedData = JSON.parse(text);
-        const newMap = new Map(Object.entries(loadedData));
-        dataRef.current = newMap;
-        setCurrentFileName(file.name.replace('.json', ''));
-        setCurrentFileId(null); // It's a new local file, not from DB
-        forceUpdate({});
-      } catch (err) {
-        alert('Error: Could not parse the file. Please ensure it is a valid JSON file.');
-      }
-    };
-    input.click();
-  };
+        newMap = new Map(Object.entries(loadedData));
+      } else {
+        // Handle XLSX, CSV, ODS, etc. using SheetJS
+        const data = await file.arrayBuffer();
+        const workbook = XLSX.read(data);
+        const worksheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[worksheetName];
+        
+        // Convert sheet to an array of arrays
+        const sheetData: any[][] = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
 
+        // Convert the array of arrays to our Map format
+        sheetData.forEach((row, rowIndex) => {
+          row.forEach((cellValue, colIndex) => {
+            if (cellValue !== null && cellValue !== undefined) {
+              // The getCellKey function should be available in this scope
+              const key = getCellKey(rowIndex, colIndex); 
+              newMap.set(key, String(cellValue));
+            }
+          });
+        });
+      }
+
+      // Update the state with the newly parsed data
+      dataRef.current = newMap;
+      setCurrentFileName(fileName);
+      setCurrentFileId(null); // It's a new local file, not from DB
+      forceUpdate({});
+
+    } catch (err) {
+      console.error("Error processing file:", err);
+      alert('Error: Could not read or parse the selected file.');
+    }
+  };
+  input.click();
+};
   const handleExport = (format: 'csv' | 'xlsx' | 'pdf' | 'html') => {
     const data = dataRef.current;
     const fileName = currentFileName;
